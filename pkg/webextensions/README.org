@@ -1,0 +1,139 @@
+#+PROPERTY: header-args :eval never :exports code :results silent
+#+title: Go native applications for browser extensions
+
+Essentially this is an adapter for the Go [[https://golang.org/pkg/net/rpc/jsonrpc][net/rpc/jsonrpc]] standard package
+that implements communication with browsers through =stdin= and =stdout=
+pipes using a kind of streaming JSON protocol with package size
+as a binary header.
+
+* Examples of code
+
+If you are eager to see a code example, the following is a snippet
+of native application:
+#+begin_src go
+  rpc.RegisterName("example", &ExampleBackend{})
+  rpc.ServeCodec(webextensions.NewServerCodecSplit(
+	  os.Stdin, os.Stdout, jsonrpc.NewServerCodec))
+#+end_src
+
+In add-on code you would likely prefer to have ~Promise~ based
+interface. Under the hood it would do something like
+#+begin_src js
+  const port = browser.runtime.connectNative(BACKEND_ID);
+  port.onMessage.addListener(console.log);
+  port.postMessage({id, method: "example.Method", params: [arg]});
+#+end_src
+
+Have a look at [[file:../../examples][=../../examples/]] directory for a complete example
+of a backend and a Firefox extension.
+
+* Rationale of native messaging application for browser add-ons
+
+To allow browser extensions (WebExtensions) access to local files or
+running external applications, it is necessary to install
+a special application and to use native messaging protocol
+for communication with it.
+
+See developer reference for details:
+
+- Firefox: <https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging>
+- Chrome: <https://developer.chrome.com/apps/nativeMessaging>
+
+Requirement of intermediate application originates from security reasons.
+Browsers protect users by sandboxing web content and add-ons.
+Native backend is a way to escape this jail and to allow
+operation with local files. At the same time it is additional risk
+that, having full access to filesystem, a malicious
+add-on might steal sensitive data with help of backend application.
+However installing and configuring of external application in addition
+to a browser extension is an extra step for users that reduces the chance
+that additional privileges are unintentional.
+The expected and unavoidable consequence of such policy is that native
+backends are rarely used.
+
+Local HTTP server is not always a replacement of a native
+messaging application. Various sites inspect open ports in your
+local network sending requests from your browser.
+Starter guides how to create an RPC server often skip issues
+related to authentication and local TLS certificate authority.
+Provided examples usually even do not limit listen addresses
+of a TCP port to the loopback interface.
+As a result backend is exposed to whole local network
+that may be large enough when such server is used in an office.
+Even if 127.0.0.1 of =::1=  optional argument of listen call is not missed,
+any application (maybe one belongs to other user) on the local machine
+can connect to the TCP port.
+The opposite side of hassle with configuration of native messaging
+host is more direct and so private access to local files
+(of course, only if the backend is a trusted application).
+
+* Go package for native messaging hosts in details
+
+JSON is a natural way to exchange data from browser's JavaScript.
+Additional layer of JSON-RPC protocol allows to reliably
+discriminate regular results, runtime errors handled by application,
+and serious problems lead to crash.
+
+Since packages have identifiers, it is possible to process
+several queries in parallel. However some measures
+to limit concurrent heavy queries may be required
+and they have not been taken yet.
+
+This package has been developed for the RPC framework
+from the standard [[https://golang.org/pkg/net/rpc][net/rpc]] package (a frozen one). More precisely
+it provides a decorator for ~ServerCodec~
+from the [[https://golang.org/pkg/net/rpc/jsonrpc][net/rpc/jsonrpc]] package. Such approach
+has some limitations:
+
+- JSON-RPC 1.0 only.
+- Single parameter passed as single element array.
+- No support of contexts[fn:gocontext] that allows to associate some data
+  with particular request, to impose a timeout, or to cancel
+  processing.
+- Structured errors are impossible due to a filed of string type in
+  the intermediate structure from =net/rpc= package.
+
+
+Maybe it is possible to use utilities from this package
+with a third-party Go RPC package following contemporary best practices.
+
+[fn:gocontext] Sameer Ajmani. [[https://blog.golang.org/context][Go Concurrency Patterns: Context]].
+The Go Blog. 29 July 2014.
+
+
+This library provides just a couple of things that allow
+WebExtensions native messaging protocol to fit into the Go RPC
+framework.
+- It handles message size in binary form before text message,
+  a particular kind of [[https://en.wikipedia.org/wiki/JSON_streaming][JSON Streaming]]
+- Unlike usual for =net/rpc= network connections, WebExtensions native
+  messaging protocol uses separate =stdin= and =stdout= channels, so
+  this library glues them into a single object.
+
+Standard =net/rpc/jsonrpc= package uses capitalized method names
+since they are directly mapped to Go exported functions.
+As a workaround, another wrapper for =jsonrpc.ServerCodec= may be added
+
+#+begin_src go
+  if err := rpc.RegisterName("Example", backend); err != nil {
+	  return err
+  }
+  methodMap := map[string]string{
+	  "example.greet": "Example.Greet",
+  }
+  rpc.ServeCodec(webextensions.NewServerCodecSplit(
+	  os.Stdin, os.Stdout,
+	  webextensions.MappedServerCodecFactory(methodMap, jsonrpc.NewServerCodec)
+  ))
+#+end_src
+
+~Manifest~ struct might help to generate native messaging manifest file.
+
+~ClientCodec~ wrapper in this package facilitates
+writing of backend test utilities.
+
+This is a toy project that was started to get some impression of Go
+programming in general and of standard library interfaces in
+particular. It can be considered a bit over-engineered but it allows
+to avoid dumb code with hand-written serialization and
+deserialization. I hope it might be still useful to someone.

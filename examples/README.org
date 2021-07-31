@@ -1,0 +1,92 @@
+#+PROPERTY: header-args :eval never-export :exports code :results silent
+#+TITLE: Usage examples of Go WebExtensions package
+
+Go module =github.com/maxnikulin/burl= contains
+=github.com/maxnikulin/burl/pkg/webextensions= package that implements
+native messaging communication protocol for browser extensions.
+See [[file:../pkg/webextensions][=pkg/webextensions=]] folder for details.
+Out of the box the package works on Linux only.
+
+It is assumed that the reader interested in these examples is familiar
+with native messaging API in browsers. Otherwise consult developers
+guides:
+[[https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging][Mozilla]]
+or [[https://developer.chrome.com/apps/nativeMessaging][Chrome]]
+pages.
+
+To try example add-on in Firefox do the following steps.
+(For Chrome it is necessary to adjust manifest files.)
+
+Compile [[file:./webextensions_backend/webextensions_example_backend.go][example backend]]
+#+begin_src bash
+  go build ./webextensions_backend/webextensions_example_backend.go
+#+end_src
+
+The package allows to write test utilities that runs backend
+without browser. The aim is to minimize overhead during debugging.
+You can try an example of such
+[[file:webextensions_client/webextensions_example_client.go][test client]]:
+#+begin_src bash :results verbatim replace :exports both
+  go run ./webextensions_client -- ./webextensions_example_backend
+#+end_src
+
+#+RESULTS:
+: sqrt: query 2 result 1.4142135623730951
+: sqrt: query -2 error square root of negative number
+
+Browser allows to call an external application only if such
+permission is granted through native messaging manifest JSON file.
+It specifies full path to the application and list of extensions
+that can run it. (For Chrome the related field is named
+=allowed_origins= and contains a list of extension keys.)
+
+#+CAPTION: Template for native messaging manifest
+#+NAME: native_messaging_manifest_template
+#+begin_example
+  {
+	  "name": "io.github.maxnikulin.burl_webextensions_example",
+	  "description": "Example of backend written using bURL webextnesions Go package",
+	  "path": "@@EXAMPLESDIR@@/webextensions_example_backend",
+	  "type": "stdio",
+	  "allowed_extensions": [ "burl_webextensions_example@maxnikulin.github.io" ]
+  }
+#+end_example
+
+Replace =@@EXAMPLESDIR@@= with actual directory of compiled
+backend and put the resulted file to =~/.mozilla/native-messaging-hosts/=
+in the case of Firefox.
+Base part of the file name should be the same as =name= field in manifest,
+its extension should be =.json=.
+
+#+header: :stdin native_messaging_manifest_template
+#+header: :output-dir ~/.mozilla/native-messaging-hosts
+#+header: :file io.github.maxnikulin.burl_webextensions_example.json
+#+begin_src bash :results file replace
+  set -eu
+  examplesdir_default="$(pwd)"
+  : "${examplesdir:=${examplesdir_default}}"
+  sed -e "s|@@EXAMPLESDIR@@|${examplesdir}|"
+#+end_src
+
+Now you are ready to load browser extension from the
+[[file:webextensions_addon][=webextensions_addons=]] directory as a temporary add-on:
+#+begin_src sh
+  firefox 'about:debugging#/runtime/this-firefox'
+#+end_src
+Chrome expect file name =manifest.json= as well but it
+requires a different way to specify identifier for the extension.
+Ready to use file is not provided but you can generate a key
+and adjust for it extension and native messaging manifests.
+
+[[file:webextensions_addon/background.js][Extension]] adds 3 items to the context menu. Result of execution
+is logged to the add-on console available through "Inspect" button
+from the debugging tab.
+Certainly in real extensions communication with native application should
+be more resistant to various errors than example of
+[[file:webextensions_addon/rpc_client.js][RPC client]].
+Since backend library relies on Go package =net/rpc/jsonrpc=
+from standard library, it supports only JSON-RPC 1.0 with single
+argument in =params= field or request ={ params: [ arg ], id, method }=.
+JSON-RPC 2.0 requests should not cause a problem while they follow
+convention for single argument. Do not expect structured errors
+in response however.

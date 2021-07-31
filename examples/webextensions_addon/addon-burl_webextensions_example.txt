@@ -1,0 +1,4 @@
+This file is added just for convenience to pick it in file selection
+dialog during loading of temporary extension in Firefox.
+It is selected by default and creates a descriptive entry
+in the list of recent documents.

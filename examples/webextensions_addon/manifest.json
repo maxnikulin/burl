@@ -1,0 +1,24 @@
+{
+	"manifest_version": 2,
+	"name": "Go Backend Example",
+	"version": "0.1",
+
+	"description": "Example of Go native messaging backend for Webextensions",
+	"author": "Max Nikulin",
+	"homepage_url": "https://github.com/maxnikulin/burl",
+
+	"applications": {
+		"gecko": {
+			"id": "burl_webextensions_example@maxnikulin.github.io",
+	  		"strict_min_version": "50.0"
+		}
+	},
+
+	"permissions": [
+		"menus", "nativeMessaging"
+	],
+
+	"background": {
+		"scripts": [ "rpc_client.js", "background.js" ]
+	}
+}
