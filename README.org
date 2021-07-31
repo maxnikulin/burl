@@ -46,10 +46,10 @@ It is necessary to load [[https://orgmode.org/manual/Protocols.html][org-protoco
 e.g. by customizing list of Org packages:
 src_elisp{(customize-variable-other-window 'org-modules)}
 unless you are going to insert captured notes using
-[[help:org-paste-subtree][=C-c C-x C-y=, ~org-paste-subtree~]].
+[[help:org-paste-subtree][C-c C-x C-y, org-paste-subtree]].
 
-# FIXME: link to releases
 Certainly you need to download the binary or to build it yourself from sources.
+GitHub project page has the [[https://github.com/maxnikulin/burl/releases/][releases]] section.
 Programming language for this project is Go. To compile it should be enough
 to type
 #+begin_src bash
@@ -163,7 +163,7 @@ of code to your Emacs init file
   (add-hook 'server-visit-hook #'lr-org-reveal-folded-line)
 #+end_src
 
-Alternatively use =C-c C-r= that is a binding for =M-x= [[help:org-reveal][=org-reveal=]].
+Alternatively use =C-c C-r= that is a binding for =M-x= [[help:org-reveal][org-reveal]].
 
 ** Frame (window) for capture or to show existing link
    :PROPERTIES:
@@ -188,7 +188,7 @@ how to it may look like:
 * Webextensions package for Go
 
 This project has a simple Go package that provides tools for using
-[[https://pkg.go.dev/net/rpc/jsonrpc][=net/rpc/jsonrpc=]] (frozen) package from Go standard library through =stdin=
+[[https://pkg.go.dev/net/rpc/jsonrpc][net/rpc/jsonrpc]] (frozen) package from Go standard library through =stdin=
 and =stdout= pipes accordingly to native messaging protocol in browsers.
 Its advantage is no external dependencies, its disadvantages
 are absence of support of request contexts and single parameter
@@ -196,12 +196,12 @@ of RPC methods that must be passed as single-element array.
 You may consider JSON-RPC 1.0 as not flexible enough with version 2.0
 of the protocol.
 
-See [[file:pkg/webextensions][=pkg/webextensions=]] forder for more detailed description.
-The [[file:examples][=examples=]] directory contains a small backend and a Firefox
+See [[file:pkg/webextensions][pkg/webextensions]] forder for more detailed description.
+The [[file:examples][examples]] directory contains a small backend and a Firefox
 extension that can call its methods.
 * License
 
 GPL v3
 
-An example of browser add-on [[file:examples/webextensions_addon][=examples/webextensions_addon=]] is licensed
-under MPL-2.0 (it is no more than a demo for the [[file:pkg/webextensions][=pkg/webextensions=]] Go package).
+An example of browser add-on [[file:examples/webextensions_addon][examples/webextensions_addon]] is licensed
+under MPL-2.0 (it is no more than a demo for the [[file:pkg/webextensions][pkg/webextensions]] Go package).
