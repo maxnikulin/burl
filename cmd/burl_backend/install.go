@@ -107,11 +107,26 @@ func processInstallFlags(
 		// Another way is to use os.SameFile however it may be more
 		// reasonable to overwrite a hardlink.
 		if installOptions.WrapperPath != backendOptions.Exe {
+			exe, err := burl_fileutil.EscapeShellArg(backendOptions.Exe)
+			if err != nil {
+				return retval, err
+			}
 			escaped_args, err := backendOptions.AsShellCommand()
 			if err != nil {
 				return retval, err
 			}
-			content := fmt.Sprintf("#!/bin/sh -eu\nexec %s\n", strings.Join(escaped_args, " "))
+			template := `#!/bin/sh -eu
+BURL_BACKEND=%s
+# Execution aborted on not found file even without "-e" option.
+# "trap HANDLER EXIT" is ignored as well. So a test is required.
+[ -x "$BURL_BACKEND" ] && \
+	exec "$BURL_BACKEND" %s
+err="{\"error\": \"$(printf '%%s' "$BURL_BACKEND" | tr '\\"' "/'"): file not found or not executable\"}"
+# platform endian-dependent hack
+/usr/bin/printf "\\x$(printf '%%x' "${#err}")\\x00\\x00\\x00"
+printf '%%s' "$err"
+`
+			content := fmt.Sprintf(template, exe, strings.Join(escaped_args, " "))
 			err = burl_fileutil.WriteFile(installOptions.WrapperPath, []byte(content), 0755, installOptions.Force)
 			if err != nil {
 				return retval, fmt.Errorf("%w: failed to write wrapper", err)

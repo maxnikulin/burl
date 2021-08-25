@@ -78,12 +78,11 @@ func (a *BurlBackendArgs) FixPaths() error {
 
 // "$@" (or "$1" and "$2") is not added, so arguments passed by the browser are unavailable
 func (a *BurlBackendArgs) AsShellCommand() ([]string, error) {
-	retval := make([]string, 1, 3+len(a.LinkSources))
-	retval[0] = a.Exe
+	retval := make([]string, 0, 2+len(a.LinkSources))
 	if logfile, err := burl_fileutil.EscapeShellArg(a.LogFile); err == nil {
 		retval = append(retval, "--log", logfile)
 	} else {
-		return retval, nil
+		return retval, err
 	}
 	for _, s := range a.LinkSources {
 		value, err := burl_fileutil.EscapeShellArg(s.Name())
