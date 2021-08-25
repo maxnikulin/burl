@@ -131,6 +131,7 @@ func (b *BurlBackend) Hello(query *burl_rpc.HelloQuery, reply *burl_rpc.HelloRes
 	}
 	reply.Format = format
 	reply.Version = version
+	reply.Options = map[string]interface{}{"clipboardForBody": false}
 	if len(b.srcFiles) > 0 {
 		reply.Capabilities = append(reply.Capabilities, "visit", "urlMentions")
 	}

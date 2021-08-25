@@ -52,9 +52,10 @@ type HelloQuery struct {
 }
 
 type HelloResponse struct {
-	Format       string   `json:"format"`
-	Version      string   `json:"version"`
-	Capabilities []string `json:"capabilities"`
+	Format       string      `json:"format"`
+	Version      string      `json:"version"`
+	Capabilities []string    `json:"capabilities"`
+	Options      interface{} `json:"options,omitempty"`
 }
 
 type CaptureData struct {
