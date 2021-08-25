@@ -68,4 +68,10 @@ type CaptureQuery struct {
 	Version string      `json:"version"`
 	Options interface{} `json:"options,omitempty"`
 	Data    CaptureData `json:"data"`
+	Error   interface{} `json:"error"`
+}
+
+type CaptureResponse struct {
+	Preview bool   `json:"preview"`
+	Status  string `json:"status"`
 }

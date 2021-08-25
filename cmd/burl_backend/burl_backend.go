@@ -137,15 +137,19 @@ func (b *BurlBackend) Hello(query *burl_rpc.HelloQuery, reply *burl_rpc.HelloRes
 	return nil
 }
 
-func (_ *BurlBackend) Capture(query *burl_rpc.CaptureQuery, reply *bool) error {
+func (_ *BurlBackend) Capture(query *burl_rpc.CaptureQuery, reply *burl_rpc.CaptureResponse) error {
 	if query.Format != "org-protocol" {
 		return errors.New("linkremark.capture: format is not 'org-protocol'")
+	}
+	if query.Error != nil {
+		*reply = burl_rpc.CaptureResponse{Preview: true, Status: "preview"}
+		return nil
 	}
 	url := query.Data.Url
 	if err := burl_emacs.OrgProtocol(url); err != nil {
 		return fmt.Errorf("linkremark.capture: %w", err)
 	}
-	*reply = true
+	*reply = burl_rpc.CaptureResponse{Preview: false, Status: "success"}
 	return nil
 }
 
