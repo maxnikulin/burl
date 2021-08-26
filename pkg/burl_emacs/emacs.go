@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 )
@@ -26,8 +27,22 @@ import (
 var Command string = "emacsclient"
 var Args = []string{
 	"--quiet",
-	"--alternate-editor",
-	`sh -c "echo 'bURL: Emacs server is not running'; exit 9" burl-report-no-emacs-server`,
+	// Attempt to discriminate "can't find socket" from other errors
+	// and to suppress excessively verbose error message.
+	// --quiet and --suppress-output does not prevent the following
+	// message if emacs server is not running:
+	//
+	//    emacsclient: No socket or alternate editor.  Please use:
+	//
+	//            --socket-name
+	//            --server-file      (or environment variable EMACS_SERVER_FILE)
+	//            --alternate-editor (or environment variable ALTERNATE_EDITOR)
+	//
+	// The trick with --alternate-editor allows to get minimal message
+	//
+	//     emacsclient: can't find socket; have you started the server?
+	//     To start the server in Emacs, type "M-x server-start".
+	`--alternate-editor=sh -c "exit 9"`,
 }
 var CheckOrgProtocolLisp = "(and (memq 'org-protocol features) 'org-protocol)"
 var EnsureFrameLisp = `
@@ -37,10 +52,24 @@ var EnsureFrameLisp = `
       (select-frame (make-frame '((name . "bURL") (window-system . x))))))
 `
 
+var EmacsServerNotFoundError = errors.New("Emacs server is not running, please, start it")
+
+func execEmacs(args... string) ([]byte, error) {
+	cmd := exec.Command(Command, append(Args, args...)...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		if cmd.ProcessState.ExitCode() == 9 {
+			log.Println("burl_emacs.exec", string(out))
+			return []byte{}, EmacsServerNotFoundError
+		} else {
+			return out, err
+		}
+	}
+	return out, nil
+}
+
 func EnsureFrame() error {
-	args := append(Args, "--eval", EnsureFrameLisp)
-	cmd := exec.Command(Command, args...)
-	if out, err := cmd.CombinedOutput(); err != nil {
+	if out, err := execEmacs("--eval", EnsureFrameLisp); err != nil {
 		return fmt.Errorf("%s --eval '(linkremark-ensure-frame)': %w: %s",
 			Command, err, out)
 	}
@@ -48,9 +77,7 @@ func EnsureFrame() error {
 }
 
 func CheckOrgProtocol() error {
-	args := append(Args, "--eval", CheckOrgProtocolLisp)
-	cmd := exec.Command(Command, args...)
-	out, err := cmd.CombinedOutput()
+	out, err := execEmacs("--eval", CheckOrgProtocolLisp)
 	if err != nil {
 		return fmt.Errorf("%s check org-protocol: %w: %s",
 			Command, err, out)
@@ -65,14 +92,11 @@ func VisitFile(path string, lineNo int) error {
 	if err := EnsureFrame(); err != nil {
 		return err
 	}
-	args := Args
-	args = append(args, "--no-wait")
+	args := []string{"--no-wait"}
 	if lineNo > 0 {
 		args = append(args, fmt.Sprintf("+%d", lineNo))
 	}
-	args = append(args, path)
-	cmd := exec.Command(Command, args...)
-	if out, err := cmd.CombinedOutput(); err != nil {
+	if out, err := execEmacs(args...); err != nil {
 		return fmt.Errorf("%s: %w: %s", Command, err, out)
 	}
 	return nil
