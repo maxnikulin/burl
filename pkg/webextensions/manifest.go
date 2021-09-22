@@ -30,7 +30,7 @@ type Manifest struct {
 	Path        string `json:"path"`
 	Type        string `json:"type"`
 	// Chrome
-	AllowedOrigins []string `json:"allowed_origns,omitempty"`
+	AllowedOrigins []string `json:"allowed_origins,omitempty"`
 	// Firefox
 	AllowedExtensions []string `json:"allowed_extensions,omitempty"`
 	ManifestPath      string   `json:"-"`
