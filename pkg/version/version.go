@@ -16,7 +16,7 @@
 package version
 
 var (
-	version = "v0.2" // To be overridden at the build time
+	version = "v0.3" // To be overridden at the build time
 )
 
 var Description string = "Burl - LinkRemark interface to Emacs"
