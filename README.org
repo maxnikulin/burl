@@ -21,7 +21,6 @@ In respect to capturing notes, bURL can work with
 using [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Invoking-emacsclient.html][emacsclient]]
 directly ([[info:emacs#Invoking emacsclient][info "(emacs) Invoking emacsclient"]]),
 so it is not necessary
-# FIXME 2021-09-29 org-protocl.html was unavailable (404)
 [[https://orgmode.org/worg/org-contrib/org-protocol.html][to setup desktop-wide org-protocol: handler]].
 LinkRemark source code repository has a simple native messaging app,
 [[https://github.com/maxnikulin/linkremark/blob/master/examples/backend-python/lr_emacsclient.py][lr_emacsclient.py Python script]],
@@ -35,6 +34,18 @@ You are free to capture notes using global
 [[https://orgmode.org/manual/Protocols.html][org-protocol]]
 handler or even to copy notes to clipboard.
 URL lookup works only if a list of files to search is specified.
+
+*Warning* There is a problem with browsers distriuted
+as snap or flatpack. Such applications works with
+additional level of isolation in respect to system files,
+so external application can not be invoked even through
+native messaging API. Chromium in Ubuntu is shipped as
+snap package only since Ubuntu-20.04 LTS focal, for Firefox snap is made
+default option in Ubuntu-21.10 impish, but Firefox is still
+can be installed as a deb package using apt.
+Related Firefox bugs:
+[[https://bugzilla.mozilla.org/show_bug.cgi?id=1661935][Bug 1661935: Snap: cannot install/manage extensions from extensions.gnome.org]],
+[[https://bugzilla.mozilla.org/show_bug.cgi?id=1621763][Bug 1621763: [flatpak] native messaging support missing]].
 
 The helper is tested only on Linux. The stage of its development
 currently is "proof of concept": wrapper shell script serves
