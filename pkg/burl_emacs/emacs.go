@@ -96,6 +96,7 @@ func VisitFile(path string, lineNo int) error {
 	if lineNo > 0 {
 		args = append(args, fmt.Sprintf("+%d", lineNo))
 	}
+	args = append(args, path)
 	if out, err := execEmacs(args...); err != nil {
 		return fmt.Errorf("%s: %w: %s", Command, err, out)
 	}
