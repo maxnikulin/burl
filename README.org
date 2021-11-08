@@ -219,6 +219,11 @@ how to it may look like:
 	 (make-frame '((name . "LinkRemark") (window-system . x))))))
 #+end_src
 
+It may open a file in a frame located on another desktop.
+I have not figured out how to cook something better from the following
+ingredients: ~server-window~, ~display-buffer-alist~,
+~frames-on-display-list~, ~default-frame-alist~.
+
 * Webextensions package for Go
 
 This project has a simple Go package that provides tools for using
