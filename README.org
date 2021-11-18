@@ -1,33 +1,36 @@
 
 #+PROPERTY: header-args :eval never-export :exports code :results silent
-#+TITLE: BURL — Native Messaging Application for LinkRemark
+#+TITLE: bURL — Native Messaging Application for LinkRemark
 
-This is a helper application for the [[https://github.com/maxnikulin/linkremark/][LinkRemark]] browser extension,
+This is a helper application for the LinkRemark browser extension
+([[https://addons.mozilla.org/en-GB/firefox/addon/linkremark/][install it to Firefox from addons.mozilla.org]],
+visit [[https://github.com/maxnikulin/linkremark/][project page at GitHub]])
 which goal is more convenient note taking
-on visited web pages using [[https://orgmode.org][Org mode]] for [[https://www.gnu.org/software/emacs/][GNU Emacs]].
+on visited web pages using [[https://orgmode.org][Org Mode]] for [[https://www.gnu.org/software/emacs/][GNU Emacs]].
 
-#+attr_html: :alt Screenshot of Preview & Debug Info page of LinkRemark extension for capture of https://orgmode.org/ when org-manual.org and org-guide.org are configured as note files for bURL
+#+ATTR_HTML: :alt Screenshot of Preview & Debug Info page of LinkRemark extension for capture of https://orgmode.org/ when org-manual.org and org-guide.org are configured as note files for bURL
 #+attr_html: :style max-height: 50%
 [[file:./burl-linkremark-preview-demo.png]]
 
+# Sorry, Org renderer on GitHub could not transform info: to https: links
 Such kind of application is called native messaging host
 (application, backend) for a browser add-on. It serves as a bridge
-that allows to run =emacsclient(1)= and to search URLs in your notes.
+that allows to run [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Invoking-emacsclient.html][emacsclient]]
+([[info:emacs#Invoking emacsclient][info "(emacs) Invoking emacsclient"]])
+and to search URLs in your notes.
 Browser extension can not do it directly due to security reasons.
 In respect to capturing notes, bURL can work with
 [[https://orgmode.org/manual/Protocols.html][org-protocol]]
-# Sorry, Org renderer on GitHub could not transform info: to https: links
 ([[info:org#Protocols][info "(org) Protocols"]])
 using [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Invoking-emacsclient.html][emacsclient]]
-directly ([[info:emacs#Invoking emacsclient][info "(emacs) Invoking emacsclient"]]),
-so it is not necessary
+directly, so it is not necessary
 [[https://orgmode.org/worg/org-contrib/org-protocol.html][to setup desktop-wide org-protocol: handler]].
 LinkRemark source code repository has a simple native messaging app,
 [[https://github.com/maxnikulin/linkremark/blob/master/examples/backend-python/lr_emacsclient.py][lr_emacsclient.py Python script]],
 that calls emacsclient for org-protocol: URIs representing captures.
 The advantage of bURL is that
 with a bit more configuration, browser add-on will show
-headings with the same URL as the captured page, a frame on it, or the link
+headings with the same URL as the captured page (a frame on it, or the link)
 and will allow to open a file in Emacs at particular location.
 Both features are optional.
 You are free to capture notes using global
@@ -35,7 +38,7 @@ You are free to capture notes using global
 handler or even to copy notes to clipboard.
 URL lookup works only if a list of files to search is specified.
 
-*Warning* There is a problem with browsers distriuted
+*Warning* There is a problem with browsers distributed
 as snap or flatpack. Such applications works with
 additional level of isolation in respect to system files,
 so external application can not be invoked even through
@@ -45,7 +48,7 @@ default option in Ubuntu-21.10 impish, but Firefox is still
 can be installed as a deb package using apt.
 Related Firefox bugs:
 [[https://bugzilla.mozilla.org/show_bug.cgi?id=1661935][Bug 1661935: Snap: cannot install/manage extensions from extensions.gnome.org]],
-[[https://bugzilla.mozilla.org/show_bug.cgi?id=1621763][Bug 1621763: [flatpak] native messaging support missing]].
+[[https://bugzilla.mozilla.org/show_bug.cgi?id=1621763][Bug 1621763: (flatpak) native messaging support missing]].
 
 The helper is tested only on Linux. The stage of its development
 currently is "proof of concept": wrapper shell script serves
@@ -55,11 +58,16 @@ stripping of user activity tracking query parameters are only planned.
 
 * Install
 
+# src_elisp{} is rendered literally by GitHub,
+# so elisp: links are used.
+# There are zero width spaces between link brackets
+# and "=" verbatim markers to test whether it may be
+# a workaround against markers rendered inside link description.
 To capture pages using bURL,
 [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html][server]]
 ([[info:emacs#Emacs Server][info "(emacs) Emacs Server"]]),
-should be running in Emacs: =M-x server-start= to try it,
-src_elisp{(server-start)} in config file, or start Emacs in daemon mode
+should be running in Emacs: [[elisp:(server-start)][​=M-x server-start=​]] to try it,
+~(server-start)~ in config file, or start Emacs in daemon mode
 (maybe as a user systemd service) as a long term solution.
 Without Emacs server the backend is still able to check
 presence of URLs in configured files, but links to particular lines
@@ -68,7 +76,7 @@ from LinkRemark preview page do not work.
 It is necessary to load [[https://orgmode.org/manual/Protocols.html][org-protocol]]
 ([[info:org#Protocols][info "(org) Protocols"]])
 e.g. by customizing list of Org packages:
-src_elisp{(customize-variable-other-window 'org-modules)}
+[[elisp:(customize-variable-other-window 'org-modules)][​=M-: (customize-variable-other-window 'org-modules)=​]]
 unless you are going to insert captured notes using
 [[help:org-paste-subtree][C-c C-x C-y, org-paste-subtree]].
 
@@ -86,7 +94,8 @@ file. Browsers consider it as a permission for a particular add-on
 to run the described external application. See the following references
 for more detailed description and precise location of manifest files:
 
-- Firefox: <https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging>
+- Firefox: <https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests>,
+  <https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging>
 - Chrome: <https://developer.chrome.com/apps/nativeMessaging>
 
 You may create manifest file using any text editor (e.g. Emacs)
@@ -100,7 +109,7 @@ or use a special command line option:
 
 It creates a JSON file with the name of the application, path to executable file,
 and list of extensions that are allowed to run this application.
-Then open LinkRemark configuration in browser, grant permission for native
+Next open LinkRemark configuration in browser, grant permission for native
 messaging (requested during installing in Firefox while compatibility with
 version 78 ESR is maintained) and specify backend name, that is "=io.github.maxnikulin.burl="
 by default. Google Chrome and Chromium browsers have different search
@@ -113,7 +122,7 @@ the same effect could be achieved by creating of a small shell
 wrapper that passes list of files to =burl_backend= binary.
 Manifest should contain path to the wrapper.
 It is possible to create the wrapper and the manifest at once.
-Likely you wold like to adjust list of files in the following example:
+Likely you would like to adjust list of files in the following example:
 
 #+begin_src bash :var orgdir=(eval org-directory)
   : "$(orgdir:="$HOME/org")"
@@ -127,13 +136,15 @@ Likely you wold like to adjust list of files in the following example:
 
 Pass =-backend NAME= option to use custom native host name instead of
 default =io.github.maxnikulin.burl=, e.g. =burl_wrapper=.
-There is no requirement that executables should be in your PATH,
-so some custom directory (XDG does not specify libexecdir for users)
+There is no requirement that executable should be in your PATH,
+so some custom directory (XDG does not specify =libexecdir= for users)
 may be better than =~/.local/bin=.
 
 The result should be like the following:
 
-#+caption: [[file:~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json][=~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json=]]
+# The folloing is not supported by GitHub renderer
+#    #+caption: [[file:~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json][=~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json=]]
+[[file:~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json][​=~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json=​]]
 #+begin_example
   {
     "name": "io.github.maxnikulin.burl",
@@ -148,7 +159,8 @@ The result should be like the following:
 
 Omitting error-handling stuff, wrapper looks like
 
-#+caption: [[file:~/.local/bin/burl_wrapper][=~/.local/bin/burl_wrapper=]]
+# Unsupported by GitHub: #+caption:
+[[file:~/.local/bin/burl_wrapper][​=~/.local/bin/burl_wrapper=​]]
 #+begin_example
   #!/bin/sh -eu
   exec /home/ubuntu/.local/bin/burl_backend --log - \
@@ -224,7 +236,7 @@ I have not figured out how to cook something better from the following
 ingredients: ~server-window~, ~display-buffer-alist~,
 ~frames-on-display-list~, ~default-frame-alist~.
 
-* Webextensions package for Go
+* WebExtensions package for Go
 
 This project has a simple Go package that provides tools for using
 [[https://pkg.go.dev/net/rpc/jsonrpc][net/rpc/jsonrpc]] (frozen) package from Go standard library through =stdin=
@@ -235,7 +247,7 @@ of RPC methods that must be passed as single-element array.
 You may consider JSON-RPC 1.0 as not flexible enough in comparison to
 version 2.0 of the protocol.
 
-See [[file:pkg/webextensions][pkg/webextensions]] forder for more detailed description.
+See [[file:pkg/webextensions][pkg/webextensions]] folder for more detailed description.
 The [[file:examples][examples]] directory contains a small backend and a Firefox
 extension that can call its methods.
 
@@ -245,3 +257,6 @@ GPL v3
 
 An example of browser add-on [[file:examples/webextensions_addon][examples/webextensions_addon]] is licensed
 under MPL-2.0 (it is no more than a demo for the [[file:pkg/webextensions][pkg/webextensions]] Go package).
+
+# LocalWords: LinkRemark backend URIs bURL WebExtensions JSON-RPC
+# LocalWords: GPL MPL flatpack stdin stdout systemd JSON RPC XDG
