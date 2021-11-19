@@ -3,7 +3,7 @@
 #+TITLE: bURL — Native Messaging Application for LinkRemark
 
 This is a helper application for the LinkRemark browser extension
-(install it [[https://addons.mozilla.org/en-GB/firefox/addon/linkremark/][to Firefox from addons.mozilla.org]],
+(install it [[https://addons.mozilla.org/firefox/addon/linkremark/][to Firefox from addons.mozilla.org]],
 visit [[https://github.com/maxnikulin/linkremark/][project page at GitHub]])
 which goal is more convenient note taking
 on visited web pages using [[https://orgmode.org][Org Mode]] for [[https://www.gnu.org/software/emacs/][GNU Emacs]].
