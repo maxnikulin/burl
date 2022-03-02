@@ -23,7 +23,10 @@ import (
 )
 
 var reHeading = regexp.MustCompile(`^(\*+)\s+(\S(?:.*\S)?)?$`)
-var reSchemeStr = "https?|doi"
+// "mid": mail messages, absent in default Org configuration, see
+// RFC 2392 - Content-ID and Message-ID Uniform Resource Locators
+// https://datatracker.ietf.org/doc/html/rfc2392.html
+var reSchemeStr = "doi|https?|mid"
 var reScheme = regexp.MustCompile("^" + reSchemeStr + ":")
 var reBracketStr = "\\[\\[((?:[^\\]\\[]|\\\\(?:\\\\\\\\)*[\\]\\[]|\\\\+[^\\]\\[])+)](?:\\[((?:.|\n)+?)\\])?\\]"
 var reAngleStr = "<(" + reSchemeStr + "):([^>\n]*(?:\n[ \t]*[^> \t\n][^> \n]*)*)>"
