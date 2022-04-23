@@ -54,7 +54,7 @@ var EnsureFrameLisp = `
 
 var EmacsServerNotFoundError = errors.New("Emacs server is not running, please, start it")
 
-func execEmacs(args... string) ([]byte, error) {
+func execEmacs(args ...string) ([]byte, error) {
 	cmd := exec.Command(Command, append(Args, args...)...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
