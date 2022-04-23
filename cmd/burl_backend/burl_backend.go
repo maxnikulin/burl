@@ -96,10 +96,14 @@ type BurlBackend struct {
 	err         error
 	once        sync.Once
 	initializer func()
+	linkSetImpl func([]burl_links.TextLinkSource, []string, *burl_rpc.LinkSetResponse) error
 }
 
-func NewBurlBackendPtr(list []burl_links.TextLinkSource) *BurlBackend {
-	backend := BurlBackend{list, nil, nil, sync.Once{}, nil}
+func NewBurlBackendPtr(args *BurlBackendArgs) *BurlBackend {
+	backend := BurlBackend{args.LinkSources, nil, nil, sync.Once{}, nil, nil}
+	if !args.DisableLinkSet {
+		backend.linkSetImpl = LinkSetReal
+	}
 	backend.initializer = func() {
 		if len(backend.srcFiles) == 0 {
 			backend.err = errors.New("No files specified for backend")
@@ -134,6 +138,9 @@ func (b *BurlBackend) Hello(query *burl_rpc.HelloQuery, reply *burl_rpc.HelloRes
 	reply.Options = map[string]interface{}{"clipboardForBody": false}
 	if len(b.srcFiles) > 0 {
 		reply.Capabilities = append(reply.Capabilities, "visit", "urlMentions")
+		if b.linkSetImpl != nil {
+			reply.Capabilities = append(reply.Capabilities, "linkSet")
+		}
 	}
 	return nil
 }
@@ -242,6 +249,31 @@ func (b *BurlBackend) Search(query *burl_rpc.SearchQuery, reply *[]burl_rpc.Repl
 	return nil
 }
 
+func LinkSetReal(srcFiles []burl_links.TextLinkSource, prefixes []string, reply *burl_rpc.LinkSetResponse) error {
+	urls, err := burl_links.ExtractLinkSetFromFileGroup(srcFiles, prefixes)
+	if err != nil {
+		return err
+	}
+	reply.Urls = make([]string, len(urls))
+	i := 0
+	for key := range urls {
+		reply.Urls[i] = key
+		i++
+	}
+	return nil
+}
+
+func (b *BurlBackend) LinkSet(query *burl_rpc.LinkSetQuery, reply *burl_rpc.LinkSetResponse) error {
+	if b.linkSetImpl == nil {
+		return fmt.Errorf("Method is disabled")
+	}
+	if len(query.Prefix) > burl_rpc.LinkSetPrefixCountLimit {
+		log.Printf("prefixes %v\n", query.Prefix)
+		return errors.New("Too many prefix variants")
+	}
+	return b.linkSetImpl(b.srcFiles, query.Prefix, reply)
+}
+
 func mainWithGracefulShutdown() error {
 	flag.Usage = Usage
 	generalFlags := createGeneralFlags(nil)
@@ -275,7 +307,7 @@ func mainWithGracefulShutdown() error {
 		log.SetOutput(logFile)
 	}
 
-	backend := NewBurlBackendPtr(backendFlags.LinkSources)
+	backend := NewBurlBackendPtr(backendFlags)
 	err := rpc.RegisterName("Burl", backend)
 	if err != nil {
 		if backendFlags.LogFile != "-" {
@@ -294,6 +326,8 @@ func mainWithGracefulShutdown() error {
 		"linkremark.visit":       "Burl.Visit",
 		"burl.urlMentions":       "Burl.UrlMentions",
 		"linkremark.urlMentions": "Burl.UrlMentions",
+		"burl.linkSet":           "Burl.LinkSet",
+		"linkremark.linkSet":     "Burl.LinkSet",
 	}
 	rpc.ServeCodec(webextensions.NewServerCodecSplit(
 		os.Stdin, os.Stdout,

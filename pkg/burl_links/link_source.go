@@ -25,6 +25,8 @@ type Filter func(*Link) bool
 type TextLinkSource interface {
 	Name() string
 	Extract(file io.Reader, filter Filter) (*TreeChildrenNode, error)
+	// map is a set for poors.
+	ExtractSet(file io.Reader, filters []string, result *map[string]bool) error
 	Flag() string
 	Clone(string) TextLinkSource
 }
@@ -73,4 +75,29 @@ func ExtractLinksFromFileGroup(list []TextLinkSource, filter Filter) (*TreeChild
 		group = nil
 	}
 	return group, err
+}
+
+func ExtractLinkSetFromFileGroup(list []TextLinkSource, filters []string) (map[string]bool, error) {
+	result := map[string]bool{}
+	var err error
+	for _, src := range list {
+		var reader io.Reader
+		name := src.Name()
+		if name == "-" {
+			reader = os.Stdin
+		} else {
+			var file io.ReadCloser
+			file, err = os.Open(name)
+			if err != nil {
+				break
+			}
+			reader = file
+			defer file.Close()
+		}
+		err = src.ExtractSet(reader, filters, &result)
+		if err != nil {
+			break
+		}
+	}
+	return result, err
 }

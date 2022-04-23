@@ -18,6 +18,7 @@ package burl_links
 import (
 	"bufio"
 	"io"
+	"log"
 	"regexp"
 )
 
@@ -93,6 +94,46 @@ func ExtractUrls(cb func(match []string) bool, file io.Reader) error {
 						break
 					}
 				}
+			}
+		}
+	}
+	return scanner.Err()
+}
+
+// TODO: replace Org regexp to something more general
+func (_ TxtLinkSource) ExtractSet(file io.Reader, filters []string, result *map[string]bool) error {
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	base, err := MakeLinkSetBase(filters)
+	if err != nil {
+		return err
+	}
+	rePlain := "\\b(" + base + rePlainSuffixStr + ")"
+	reSetLink, err := regexp.Compile(rePlain)
+	if err != nil {
+		return err
+	}
+	reBracketPrefix, err := regexp.Compile("^" + base)
+	if err != nil {
+		return err
+	}
+	for scanner.Scan() {
+		line := scanner.Text()
+		matchArray := reSetLink.FindAllStringSubmatch(line, -1)
+		if matchArray == nil {
+			continue
+		}
+		for _, match := range matchArray {
+			if bracket := match[1]; len(bracket) > 0 {
+				if reBracketPrefix.MatchString(bracket) {
+					(*result)[bracket] = true
+				}
+			} else if angle := match[3]; len(angle) > 0 {
+				(*result)[angle] = true
+			} else if plain := match[4]; len(plain) > 0 {
+				(*result)[plain] = true
+			} else {
+				log.Printf("burl_links.TxtLinkSource.ExtractSet: internal error '%v'", match[0])
 			}
 		}
 	}

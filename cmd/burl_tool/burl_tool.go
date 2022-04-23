@@ -26,10 +26,22 @@ import (
 	"github.com/maxnikulin/burl/pkg/burl_url"
 )
 
+type MultiStringFlag []string
+
+func (MultiStringFlag) String() string {
+	return "FIXME: this is a MultiStringFlag proxy, value should be accessed directly"
+}
+
+func (f *MultiStringFlag) Set(value string) error {
+	*f = append(*f, value)
+	return nil
+}
+
 func Usage() {
 	out := flag.CommandLine.Output()
 	cmd := flag.CommandLine.Name()
 	fmt.Fprintf(out, "Usage: %s [-org ORG_FILE]... URL ORG_FILE...\n", cmd)
+	fmt.Fprintf(out, "   or: %s [-org ORG_FILE]... (-set PREFIX)... ORG_FILE...\n", cmd)
 	fmt.Fprintf(out, "\nFilter heading with links to URL. An iternal test utility for bURL.\n")
 	fmt.Fprintf(out, "Currently result is reported as JSON but it may be changed soon.\n")
 }
@@ -40,19 +52,37 @@ func mainWithGracefulShutdown() error {
 	countLimit := 8
 	linkSources := make(burl_links.MixedSrcTypeSlice, 0, 4)
 	burl_links.AddSourceFlags(&linkSources, nil)
+	set := make(MultiStringFlag, 0, 4)
+	flag.Var(&set, "set", "Link prefix to extract set of links")
 	flag.Usage = Usage
 	flag.Parse()
 	if flag.NArg() < 1 {
 		return fmt.Errorf("%w: no url to query", usageError)
 	}
 
-	variants := burl_url.UrlVariants(flag.Arg(0))
+	nextArg := 0
+	variants := make([]string, 0, 8)
+	if len(set) == 0 {
+		burl_url.UrlVariants(flag.Arg(0))
+		nextArg = 1
+	}
 	queryIsEmpty := len(variants) == 0
 
-	if flag.NArg() == 1 && len(linkSources) == 0 {
+	if flag.NArg() == nextArg && len(linkSources) == 0 {
 		linkSources = append(linkSources, burl_links.TxtLinkSource("-"))
 	}
-	linkSources = burl_links.AddSourceArgs(linkSources, flag.Args()[1:])
+	linkSources = burl_links.AddSourceArgs(linkSources, flag.Args()[nextArg:])
+
+	if len(set) > 0 {
+		result, err := burl_links.ExtractLinkSetFromFileGroup(linkSources, set)
+		if err != nil {
+			return err
+		}
+		for key, _ := range result {
+			fmt.Println(key)
+		}
+		return nil
+	}
 
 	filterExact := func(link *burl_links.Link) bool {
 		if queryIsEmpty {

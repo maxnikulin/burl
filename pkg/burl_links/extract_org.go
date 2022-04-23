@@ -17,22 +17,30 @@ package burl_links
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"regexp"
+	"strings"
 )
 
 var reHeading = regexp.MustCompile(`^(\*+)\s+(\S(?:.*\S)?)?$`)
+
 // "mid": mail messages, absent in default Org configuration, see
 // RFC 2392 - Content-ID and Message-ID Uniform Resource Locators
 // https://datatracker.ietf.org/doc/html/rfc2392.html
 var reSchemeStr = "doi|https?|mid"
 var reScheme = regexp.MustCompile("^" + reSchemeStr + ":")
 var reBracketStr = "\\[\\[((?:[^\\]\\[]|\\\\(?:\\\\\\\\)*[\\]\\[]|\\\\+[^\\]\\[])+)](?:\\[((?:.|\n)+?)\\])?\\]"
-var reAngleStr = "<(" + reSchemeStr + "):([^>\n]*(?:\n[ \t]*[^> \t\n][^> \n]*)*)>"
-var rePlainStr = "\\b(" + reSchemeStr + "):((?:[^][ \t\n(\\)<>]|\\((?:[^][ \t\n(\\)<>]|\\([^][ \t\n(\\)<>]*\\))*\\))+(?:[^[:punct:] \t\n]|/|\\((?:[^][ \t\n(\\)<>]|\\([^][ \t\n(\\)<>]*\\))*\\)))"
+var reAngleSuffixStr = "[^>\n]*(?:\n[ \t]*[^> \t\n][^> \n]*)*"
+var reAngleStr = "<(" + reSchemeStr + "):(" + reAngleSuffixStr + ")>"
+var rePlainSuffixStr = "(?:[^][ \t\n(\\)<>]|\\((?:[^][ \t\n(\\)<>]|\\([^][ \t\n(\\)<>]*\\))*\\))+(?:[^[:punct:] \t\n]|/|\\((?:[^][ \t\n(\\)<>]|\\([^][ \t\n(\\)<>]*\\))*\\))"
+var rePlainStr = "\\b(" + reSchemeStr + "):(" + rePlainSuffixStr + ")"
 
 var reLink = regexp.MustCompile(reBracketStr + "|" + reAngleStr + "|" + rePlainStr)
+
+// To validate linkSet query parameter
+var reSetPrefix = regexp.MustCompile("^(?:(?i)[a-z]+(?:[-+a-z0-9]*[a-z0-9])?)(:[^\n]*)?$")
 
 type OrgLinkSource string
 
@@ -121,4 +129,64 @@ func (_ OrgLinkSource) Extract(file io.Reader, filter Filter) (*TreeChildrenNode
 		}
 	}
 	return &tree, scanner.Err()
+}
+
+func MakeLinkSetBase(filters []string) (string, error) {
+	if len(filters) == 0 {
+		return "", fmt.Errorf("Empty filter list")
+	}
+	base := make([]string, 0, len(filters))
+	for _, prefix := range filters {
+		match := reSetPrefix.FindStringSubmatch(prefix)
+		if match == nil {
+			return "", fmt.Errorf("Invalid prefix")
+		}
+		withColon := regexp.QuoteMeta(prefix)
+		if len(match[1]) == 0 {
+			withColon += ":"
+		}
+		base = append(base, withColon)
+	}
+	return "(?:" + strings.Join(base, "|") + ")", nil
+}
+
+// TODO: buld filter regexp ones for several files.
+func (_ OrgLinkSource) ExtractSet(file io.Reader, filters []string, result *map[string]bool) error {
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	base, err := MakeLinkSetBase(filters)
+	if err != nil {
+		return err
+	}
+	reAngle := "<(" + base + reAngleSuffixStr + ")>"
+	rePlain := "\\b(" + base + rePlainSuffixStr + ")"
+	reSetLink, err := regexp.Compile(reBracketStr + "|" + reAngle + "|" + rePlain)
+	if err != nil {
+		return err
+	}
+	reBracketPrefix, err := regexp.Compile("^" + base)
+	if err != nil {
+		return err
+	}
+	for scanner.Scan() {
+		line := scanner.Text()
+		matchArray := reSetLink.FindAllStringSubmatch(line, -1)
+		if matchArray == nil {
+			continue
+		}
+		for _, match := range matchArray {
+			if bracket := match[1]; len(bracket) > 0 {
+				if reBracketPrefix.MatchString(bracket) {
+					(*result)[bracket] = true
+				}
+			} else if angle := match[3]; len(angle) > 0 {
+				(*result)[angle] = true
+			} else if plain := match[4]; len(plain) > 0 {
+				(*result)[plain] = true
+			} else {
+				log.Printf("burl_links.OrgLinkSource.ExtractSet: internal error '%v'", match[0])
+			}
+		}
+	}
+	return scanner.Err()
 }

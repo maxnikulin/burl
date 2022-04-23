@@ -25,9 +25,10 @@ import (
 )
 
 type BurlBackendArgs struct {
-	Exe         string
-	LogFile     string
-	LinkSources burl_links.MixedSrcTypeSlice
+	DisableLinkSet bool
+	Exe            string
+	LogFile        string
+	LinkSources    burl_links.MixedSrcTypeSlice
 }
 
 var DefaultLogDestination string = "-"
@@ -37,11 +38,14 @@ func AddBackendFlags(flagset *flag.FlagSet) *BurlBackendArgs {
 		flagset = flag.CommandLine
 	}
 	v := BurlBackendArgs{
-		LogFile:     DefaultLogDestination,
-		LinkSources: make(burl_links.MixedSrcTypeSlice, 0, 4),
+		DisableLinkSet: false,
+		LogFile:        DefaultLogDestination,
+		LinkSources:    make(burl_links.MixedSrcTypeSlice, 0, 4),
 	}
 	flagset.StringVar(&v.LogFile, "log", DefaultLogDestination,
 		"file name for logging, \"\" to disable looging, \"-\" for stderr")
+	flagset.BoolVar(&v.DisableLinkSet, "disable-link-set", false,
+		"Do not allow linkSet method for extracting of all links by e.g. https: prefix")
 	burl_links.AddSourceFlags(&v.LinkSources, flagset)
 	return &v
 }

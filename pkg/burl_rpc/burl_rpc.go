@@ -76,3 +76,13 @@ type CaptureResponse struct {
 	Preview bool   `json:"preview"`
 	Status  string `json:"status"`
 }
+
+var LinkSetPrefixCountLimit = 16
+
+type LinkSetQuery struct {
+	Prefix []string `json:"prefix"`
+}
+
+type LinkSetResponse struct {
+	Urls []string `json:"urls"`
+}

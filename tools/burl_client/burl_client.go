@@ -36,6 +36,7 @@ func Usage() {
 	fmt.Fprintf(out, "   or: %s BACKEND_LAUNCH_COMMAND... -- capture ORG_PROTOCOL_URI\n", cmd)
 	fmt.Fprintf(out, "   or: %s BACKEND_LAUNCH_COMMAND... -- mentions URL...\n", cmd)
 	fmt.Fprintf(out, "   or: %s BACKEND_LAUNCH_COMMAND... -- visit [--line LINE_NO] --file PATH\n", cmd)
+	fmt.Fprintf(out, "   or: %s BACKEND_LAUNCH_COMMAND... -- set PREFIX...\n", cmd)
 	fmt.Fprintf(out, "\nExecutes the following backend methods:\n")
 	fmt.Fprintf(out, "linkremark.hello, linkremark.capture, linkremark.urlMentions, linkremark.visit\n")
 	flag.PrintDefaults()
@@ -68,6 +69,13 @@ func callCapture(args []string) (string, interface{}, error) {
 		Version: "0.2",
 	}
 	return "linkremark.capture", query, nil
+}
+
+func callSet(args []string) (string, interface{}, error) {
+	query := burl_rpc.LinkSetQuery{
+		Prefix: args[1:],
+	}
+	return "linkremark.linkSet", query, nil
 }
 
 func callHello(args []string) (string, interface{}, error) {
@@ -142,6 +150,7 @@ func mainWithGracefulShutdown() error {
 		"mentions": callUrlMentions,
 		"capture":  callCapture,
 		"hello":    callHello,
+		"set":      callSet,
 	}
 	subcommandName := flag.Arg(separator + 1)
 	sub, ok := subcommands[subcommandName]
