@@ -18,13 +18,25 @@ package burl_emacs
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os/exec"
 	"strings"
 )
 
+type UserArgsFlag []string
+
+func (UserArgsFlag) String() string {
+	return "FIXME: this is UserArgsFlag proxy, value should not be accessed directly"
+}
+func (f *UserArgsFlag) Set(value string) error {
+	*f = append(*f, value)
+	return nil
+}
+
 var Command string = "emacsclient"
+
 var Args = []string{
 	"--quiet",
 	// Attempt to discriminate "can't find socket" from other errors
@@ -44,6 +56,7 @@ var Args = []string{
 	//     To start the server in Emacs, type "M-x server-start".
 	`--alternate-editor=sh -c "exit 9"`,
 }
+var UserArgs UserArgsFlag = make(UserArgsFlag, 0, 4)
 var CheckOrgProtocolLisp = "(and (memq 'org-protocol features) 'org-protocol)"
 var EnsureFrameLisp = `
 (if (and (symbolp 'linkremark-ensure-frame) (fboundp 'linkremark-ensure-frame))
@@ -55,7 +68,9 @@ var EnsureFrameLisp = `
 var EmacsServerNotFoundError = errors.New("Emacs server is not running, please, start it")
 
 func execEmacs(args ...string) ([]byte, error) {
-	cmd := exec.Command(Command, append(Args, args...)...)
+	allArgs := append(UserArgs, Args...)
+	allArgs = append(allArgs, args...)
+	cmd := exec.Command(Command, allArgs...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		if cmd.ProcessState.ExitCode() == 9 {
@@ -120,4 +135,13 @@ func OrgProtocol(uri string) error {
 		return fmt.Errorf("%s: %w: %s", Command, err, out)
 	}
 	return nil
+}
+
+func AddFlags(flagset *flag.FlagSet) {
+	if flagset == nil {
+		flagset = flag.CommandLine
+	}
+	flag.StringVar(&Command, "emacsclient", Command,
+		"Use `EXE` command instead of emacsclient")
+	flag.Var(&UserArgs, "emacsarg", "Add `ARG` to emacsclient")
 }

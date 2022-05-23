@@ -278,6 +278,7 @@ func mainWithGracefulShutdown() error {
 	flag.Usage = Usage
 	generalFlags := createGeneralFlags(nil)
 	backendFlags := AddBackendFlags(nil)
+	burl_emacs.AddFlags(nil)
 	installFlags := createInstallFlags(nil)
 	flag.Parse()
 	if info, err := processGeneralFlags(generalFlags); info || err != nil {
