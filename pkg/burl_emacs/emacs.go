@@ -128,10 +128,7 @@ func OrgProtocol(uri string) error {
 	if err := EnsureFrame(); err != nil {
 		return err
 	}
-	args := Args
-	args = append(args, uri)
-	cmd := exec.Command(Command, args...)
-	if out, err := cmd.CombinedOutput(); err != nil {
+	if out, err := execEmacs(uri); err != nil {
 		return fmt.Errorf("%s: %w: %s", Command, err, out)
 	}
 	return nil
