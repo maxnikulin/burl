@@ -43,7 +43,7 @@ func AddBackendFlags(flagset *flag.FlagSet) *BurlBackendArgs {
 		LinkSources:    make(burl_links.MixedSrcTypeSlice, 0, 4),
 	}
 	flagset.StringVar(&v.LogFile, "log", DefaultLogDestination,
-		"file name for logging, \"\" to disable looging, \"-\" for stderr")
+		"`FILE` name for logging, \"\" to disable looging, \"-\" for stderr")
 	flagset.BoolVar(&v.DisableLinkSet, "disable-link-set", false,
 		"Do not allow linkSet method for extracting of all links by e.g. https: prefix")
 	burl_links.AddSourceFlags(&v.LinkSources, flagset)
