@@ -17,6 +17,7 @@ package burl_links
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -29,15 +30,50 @@ var reHeading = regexp.MustCompile(`^(\*+)\s+(\S(?:.*\S)?)?$`)
 // "mid": mail messages, absent in default Org configuration, see
 // RFC 2392 - Content-ID and Message-ID Uniform Resource Locators
 // https://datatracker.ietf.org/doc/html/rfc2392.html
-var reSchemeStr = "doi|https?|mid"
+var SchemeVariants []string = []string{"doi", "https?", "mid"}
+var reSchemeStr = MakeSchemeReStr(SchemeVariants);
 var reScheme = regexp.MustCompile("^" + reSchemeStr + ":")
 var reBracketStr = "\\[\\[((?:[^\\]\\[]|\\\\(?:\\\\\\\\)*[\\]\\[]|\\\\+[^\\]\\[])+)](?:\\[((?:.|\n)+?)\\])?\\]"
 var reAngleSuffixStr = "[^>\n]*(?:\n[ \t]*[^> \t\n][^> \n]*)*"
-var reAngleStr = "<(" + reSchemeStr + "):(" + reAngleSuffixStr + ")>"
 var rePlainSuffixStr = "(?:[^][ \t\n(\\)<>]|\\((?:[^][ \t\n(\\)<>]|\\([^][ \t\n(\\)<>]*\\))*\\))+(?:[^[:punct:] \t\n]|/|\\((?:[^][ \t\n(\\)<>]|\\([^][ \t\n(\\)<>]*\\))*\\))"
-var rePlainStr = "\\b(" + reSchemeStr + "):(" + rePlainSuffixStr + ")"
+var reLink = regexp.MustCompile(MakeLinkReStr(reSchemeStr))
 
-var reLink = regexp.MustCompile(reBracketStr + "|" + reAngleStr + "|" + rePlainStr)
+func MakeSchemeReStr(variants []string) string {
+	set := map[string]bool{}
+	unique := make([]string, 0, len(variants))
+	for _, scheme := range variants {
+		if scheme != "" && !set[scheme] {
+			set[scheme] = true
+			unique = append(unique, scheme)
+		}
+	}
+	return strings.Join(unique, "|")
+}
+
+func MakeLinkReStr(schemeStr string) string {
+	reAngleStr := "<(" + schemeStr + "):(" + reAngleSuffixStr + ")>"
+	rePlainStr := "\\b(" + schemeStr + "):(" + rePlainSuffixStr + ")"
+	return reBracketStr + "|" + reAngleStr + "|" + rePlainStr
+}
+
+func UpdateRe(schemeVariants []string) error {
+	schemeStr := MakeSchemeReStr(schemeVariants)
+	if schemeStr == "" {
+		return errors.New("No scheme variants")
+	}
+	reSchemeTmp, err := regexp.Compile("^" + schemeStr + ":")
+	if err != nil {
+		return err
+	}
+	reLinkTmp, err := regexp.Compile(MakeLinkReStr(schemeStr))
+	if err != nil {
+		return err
+	}
+	reSchemeStr = schemeStr
+	reScheme = reSchemeTmp
+	reLink = reLinkTmp
+	return nil
+}
 
 // To validate linkSet query parameter
 var reSetPrefix = regexp.MustCompile("^(?:(?i)[a-z]+(?:[-+a-z0-9]*[a-z0-9])?)(:[^\n]*)?$")

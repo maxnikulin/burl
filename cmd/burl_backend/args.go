@@ -20,8 +20,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/maxnikulin/burl/pkg/burl_emacs"
 	"github.com/maxnikulin/burl/pkg/burl_fileutil"
 	"github.com/maxnikulin/burl/pkg/burl_links"
+	"github.com/maxnikulin/burl/pkg/burl_util"
 )
 
 type BurlBackendArgs struct {
@@ -29,6 +31,8 @@ type BurlBackendArgs struct {
 	Exe            string
 	LogFile        string
 	LinkSources    burl_links.MixedSrcTypeSlice
+	Scheme         burl_util.MultiStringFlag
+	EmacsArgs      burl_util.MultiStringFlag
 }
 
 var DefaultLogDestination string = "-"
@@ -41,17 +45,29 @@ func AddBackendFlags(flagset *flag.FlagSet) *BurlBackendArgs {
 		DisableLinkSet: false,
 		LogFile:        DefaultLogDestination,
 		LinkSources:    make(burl_links.MixedSrcTypeSlice, 0, 4),
+		Scheme:         *burl_util.NewMultiStringFlag(&burl_links.SchemeVariants),
+		EmacsArgs:      *burl_util.NewMultiStringFlag(&burl_emacs.UserArgs),
 	}
 	flagset.StringVar(&v.LogFile, "log", DefaultLogDestination,
 		"`FILE` name for logging, \"\" to disable looging, \"-\" for stderr")
+	flagset.Var(&v.Scheme, "scheme",
+		"Add `SCHEME` to pattern for link extraction")
 	flagset.BoolVar(&v.DisableLinkSet, "disable-link-set", false,
 		"Do not allow linkSet method for extracting of all links by e.g. https: prefix")
+	flagset.StringVar(&burl_emacs.Command, "emacsclient", burl_emacs.Command,
+		"Use `EXE` command instead of emacsclient")
+	flagset.Var(&v.EmacsArgs, "emacsarg", "Add `ARG` to emacsclient")
 	burl_links.AddSourceFlags(&v.LinkSources, flagset)
 	return &v
 }
 
 func (a *BurlBackendArgs) Customized() bool {
-	return a.LogFile != DefaultLogDestination || len(a.LinkSources) != 0
+	return (a.LogFile != DefaultLogDestination ||
+		len(a.LinkSources) != 0 ||
+		a.DisableLinkSet ||
+		a.Scheme.IsModified() ||
+		a.EmacsArgs.IsModified() ||
+		burl_emacs.Command != "emacsclient")
 }
 
 // Initialize Exe and ensure absolute paths
@@ -88,12 +104,40 @@ func (a *BurlBackendArgs) AsShellCommand() ([]string, error) {
 	} else {
 		return retval, err
 	}
+	if a.DisableLinkSet {
+		retval = append(retval, "--disable-link-set=true")
+	}
+	if burl_emacs.Command != "emacsclient" {
+		escaped, err := burl_fileutil.EscapeShellArg(burl_emacs.Command)
+		if err != nil {
+			return retval, err
+		}
+		retval = append(retval, "--emacsclient="+escaped)
+	}
+	if a.EmacsArgs.IsModified() {
+		for _, arg := range a.EmacsArgs.Values() {
+			escaped, err := burl_fileutil.EscapeShellArg(arg)
+			if err != nil {
+				return retval, err
+			}
+			retval = append(retval, "--emacsarg="+escaped)
+		}
+	}
+	if a.Scheme.IsModified() {
+		for _, arg := range a.Scheme.Values() {
+			escaped, err := burl_fileutil.EscapeShellArg(arg)
+			if err != nil {
+				return retval, err
+			}
+			retval = append(retval, "--scheme="+escaped)
+		}
+	}
 	for _, s := range a.LinkSources {
 		value, err := burl_fileutil.EscapeShellArg(s.Name())
 		if err != nil {
 			return retval, err
 		}
-		retval = append(retval, "--"+s.Flag(), value)
+		retval = append(retval, "--"+s.Flag()+"="+value)
 	}
 	return retval, nil
 }

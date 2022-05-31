@@ -278,7 +278,6 @@ func mainWithGracefulShutdown() error {
 	flag.Usage = Usage
 	generalFlags := createGeneralFlags(nil)
 	backendFlags := AddBackendFlags(nil)
-	burl_emacs.AddFlags(nil)
 	installFlags := createInstallFlags(nil)
 	flag.Parse()
 	if info, err := processGeneralFlags(generalFlags); info || err != nil {
@@ -306,6 +305,12 @@ func mainWithGracefulShutdown() error {
 		defer logFile.Sync()
 		defer logFile.Close()
 		log.SetOutput(logFile)
+	}
+
+	if backendFlags.Scheme.IsModified() {
+		if err := burl_links.UpdateRe(backendFlags.Scheme.Values()); err != nil {
+			return err
+		}
 	}
 
 	backend := NewBurlBackendPtr(backendFlags)
