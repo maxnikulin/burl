@@ -23,20 +23,25 @@ import (
 	"strings"
 
 	"github.com/maxnikulin/burl/pkg/burl_fileutil"
+	"github.com/maxnikulin/burl/pkg/burl_util"
 	"github.com/maxnikulin/burl/pkg/version"
 	"github.com/maxnikulin/burl/pkg/webextensions"
 )
 
 type installFlagValues struct {
-	Name            string
-	WrapperPath     string
-	FirefoxManifest string
-	ChromeManifest  string
-	Force           bool
+	Name               string
+	WrapperPath        string
+	FirefoxManifest    string
+	ChromeManifest     string
+	Force              bool
+	MozillaExtensionID []string
+	ChromeExtensionID  []string
 }
 
 func createInstallFlags(flagset *flag.FlagSet) *installFlagValues {
 	v := installFlagValues{}
+	v.MozillaExtensionID = append(v.MozillaExtensionID, version.FirefoxExtension)
+	v.ChromeExtensionID = append(v.ChromeExtensionID, version.ChromeExtension)
 	if flagset == nil {
 		flagset = flag.CommandLine
 	}
@@ -47,10 +52,14 @@ func createInstallFlags(flagset *flag.FlagSet) *installFlagValues {
 			" See https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_manifests"+
 			" and https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging#app_manifest"+
 			" for expected directory.")
+	flagset.Var(burl_util.NewMultiStringFlag(&v.MozillaExtensionID), "mozilla-extension",
+		"Add `ADDON_ID` to manifest allowed_extensions.")
 	flagset.StringVar(&v.ChromeManifest, "manifest-chrome", "",
 		"Generate native application manifest in `FILE`."+
 			" See https://developer.chrome.com/docs/apps/nativeMessaging/#native-messaging-host-location"+
 			" for expected directory.")
+	flagset.Var(burl_util.NewMultiStringFlag(&v.ChromeExtensionID), "chrome-extension",
+		"Add `EXTENSION_ID` (public key) to manifest allowed_origins.")
 	flagset.StringVar(&v.WrapperPath, "wrapper", "",
 		"Create wrapper `SCRIPT` that serves as configuration file")
 	flagset.BoolVar(&v.Force, "force", false,
@@ -152,7 +161,7 @@ printf '%%s' "$err"
 			Name:              name,
 			Path:              manifestExe,
 			ManifestPath:      path,
-			AllowedExtensions: []string{version.FirefoxExtension},
+			AllowedExtensions: installOptions.MozillaExtensionID,
 		}
 		if err := writeManifest(&m, installOptions.Force); err != nil {
 			return retval, fmt.Errorf("write Firefox manifest: %w", err)
@@ -168,13 +177,19 @@ printf '%%s' "$err"
 		if err != nil {
 			return retval, fmt.Errorf("Chrome manifest path: %w", err)
 		}
+		origins := make([]string, len(installOptions.ChromeExtensionID))
+		for i, id := range installOptions.ChromeExtensionID {
+			if strings.HasPrefix(id, "chrome-extension://") {
+				origins[i] = id
+			} else {
+				origins[i] = fmt.Sprintf("chrome-extension://%s/", id)
+			}
+		}
 		m := webextensions.Manifest{
-			Name:         name,
-			Path:         manifestExe,
-			ManifestPath: path,
-			AllowedOrigins: []string{
-				fmt.Sprintf("chrome-extension://%s/", version.ChromeExtension),
-			},
+			Name:           name,
+			Path:           manifestExe,
+			ManifestPath:   path,
+			AllowedOrigins: origins,
 		}
 		if err := writeManifest(&m, installOptions.Force); err != nil {
 			return retval, fmt.Errorf("write Chrome manifest: %w", err)
