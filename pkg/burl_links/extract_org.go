@@ -31,7 +31,7 @@ var reHeading = regexp.MustCompile(`^(\*+)\s+(\S(?:.*\S)?)?$`)
 // RFC 2392 - Content-ID and Message-ID Uniform Resource Locators
 // https://datatracker.ietf.org/doc/html/rfc2392.html
 var SchemeVariants []string = []string{"doi", "https?", "mid"}
-var reSchemeStr = MakeSchemeReStr(SchemeVariants);
+var reSchemeStr = MakeSchemeReStr(SchemeVariants)
 var reScheme = regexp.MustCompile("^" + reSchemeStr + ":")
 var reBracketStr = "\\[\\[((?:[^\\]\\[]|\\\\(?:\\\\\\\\)*[\\]\\[]|\\\\+[^\\]\\[])+)](?:\\[((?:.|\n)+?)\\])?\\]"
 var reAngleSuffixStr = "[^>\n]*(?:\n[ \t]*[^> \t\n][^> \n]*)*"
@@ -42,6 +42,9 @@ func MakeSchemeReStr(variants []string) string {
 	set := map[string]bool{}
 	unique := make([]string, 0, len(variants))
 	for _, scheme := range variants {
+		if strings.HasSuffix(scheme, ":") {
+			scheme = scheme[:len(scheme)-1]
+		}
 		if scheme != "" && !set[scheme] {
 			set[scheme] = true
 			unique = append(unique, scheme)
@@ -76,7 +79,7 @@ func UpdateRe(schemeVariants []string) error {
 }
 
 // To validate linkSet query parameter
-var reSetPrefix = regexp.MustCompile("^(?:(?i)[a-z]+(?:[-+a-z0-9]*[a-z0-9])?)(:[^\n]*)?$")
+var reSetPrefix = regexp.MustCompile("^(?:(?i)[a-z][a-z0-9]*(?:[-+][a-z0-9]+)*)(:[^\n]*)?$")
 
 type OrgLinkSource string
 
