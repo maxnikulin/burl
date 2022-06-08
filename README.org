@@ -1,6 +1,6 @@
 
 #+PROPERTY: header-args :eval never-export :exports code :results silent
-#+TITLE: bURL — Native Messaging Application for LinkRemark
+#+TITLE: bURL — Native Messaging Application for LinkRemark and orco
 
 This is a helper application for the LinkRemark browser extension
 (install [[https://addons.mozilla.org/firefox/addon/linkremark/][Firefox addon from addons.mozilla.org]]
@@ -8,6 +8,10 @@ or [[https://chrome.google.com/webstore/detail/mgmcoaemjnaehlliifkgljdnbpedihoe]
 visit [[https://github.com/maxnikulin/linkremark/][project page at GitHub]])
 which goal is more convenient note taking
 on visited web pages using [[https://orgmode.org][Org Mode]] for [[https://www.gnu.org/software/emacs/][GNU Emacs]].
+bURL is also a native messaging host
+for [[https://github.com/maxnikulin/orco/][orco — Org Column]] add-on for
+[[https://www.thunderbird.net/][Thunderbird]] mail and news client, this pair allow to see
+in message list which ones are mentioned in your notes.
 
 #+ATTR_HTML: :alt Screenshot of Preview & Debug Info page of LinkRemark extension for capture of https://orgmode.org/ when org-manual.org and org-guide.org are configured as note files for bURL
 #+attr_html: :style max-height: 50%
