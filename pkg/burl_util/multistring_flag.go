@@ -15,13 +15,22 @@
 
 package burl_util
 
+import "errors"
+
+const (
+	initial = iota
+	appended = iota
+	reset = iota
+)
+
 type MultiStringFlag struct {
-	slice    *[]string
-	modified bool
+	slice      *[]string
+	state      int
+	defaultLen int
 }
 
 func NewMultiStringFlag(slice *[]string) *MultiStringFlag {
-	return &MultiStringFlag{slice, false}
+	return &MultiStringFlag{slice, initial, len(*slice)}
 }
 
 func (MultiStringFlag) String() string {
@@ -30,18 +39,40 @@ func (MultiStringFlag) String() string {
 
 func (f *MultiStringFlag) Set(value string) error {
 	if value == "" {
+		if f.state == appended {
+			return errors.New("Attempt to discard earlier appended argument")
+		}
 		*f.slice = (*f.slice)[:0]
+		f.defaultLen = 0
+		f.state = reset
 	} else {
 		*f.slice = append(*f.slice, value)
+		if f.state == initial {
+			f.state = appended
+		}
 	}
-	f.modified = true
 	return nil
 }
 
 func (f *MultiStringFlag) IsModified() bool {
-	return f.modified
+	return f.state != initial
 }
 
 func (f *MultiStringFlag) Values() []string {
 	return (*f.slice)[:]
+}
+
+func (f *MultiStringFlag) ModifiedValues() []string {
+	switch f.state {
+	case initial:
+		return nil
+	case reset:
+		retval := make([]string, len(*f.slice)+1)
+		retval[0] = ""
+		copy(retval[1:], *f.slice)
+		return retval
+	case appended:
+		return (*f.slice)[f.defaultLen:]
+	}
+	return nil
 }

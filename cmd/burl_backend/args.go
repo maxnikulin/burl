@@ -115,7 +115,7 @@ func (a *BurlBackendArgs) AsShellCommand() ([]string, error) {
 		retval = append(retval, "--emacsclient="+escaped)
 	}
 	if a.EmacsArgs.IsModified() {
-		for _, arg := range a.EmacsArgs.Values() {
+		for _, arg := range a.EmacsArgs.ModifiedValues() {
 			escaped, err := burl_fileutil.EscapeShellArg(arg)
 			if err != nil {
 				return retval, err
@@ -124,7 +124,7 @@ func (a *BurlBackendArgs) AsShellCommand() ([]string, error) {
 		}
 	}
 	if a.Scheme.IsModified() {
-		for _, arg := range a.Scheme.Values() {
+		for _, arg := range a.Scheme.ModifiedValues() {
 			escaped, err := burl_fileutil.EscapeShellArg(arg)
 			if err != nil {
 				return retval, err
