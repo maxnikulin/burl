@@ -120,6 +120,10 @@ version 78 ESR is maintained) and specify backend name, that is "=io.github.maxn
 by default. Google Chrome and Chromium browsers have different search
 paths for native manifest and another field to specify list
 of allowed extensions (so =-manifest-chrome= should be passed).
+See
+[[https://chromium.googlesource.com/chromium/src/+/HEAD/docs/user_data_dir.md][User Data Directory]]
+in Chromium docs for location of profile directory.
+
 
 You may specify list of files to search whether some URL has been captured already.
 There is no a dedicated configuration file yet, however
