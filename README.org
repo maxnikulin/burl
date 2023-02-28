@@ -1,6 +1,8 @@
 
 #+PROPERTY: header-args :eval never-export :exports code :results silent
 #+TITLE: bURL — Native Messaging Application for LinkRemark and orco
+# Warning! Due to GitHub limitations do not use
+# - =verbatim= text in link description. Zero-width spaces do not help.
 
 This is a helper application for the LinkRemark browser extension
 (install [[https://addons.mozilla.org/firefox/addon/linkremark/][Firefox addon from addons.mozilla.org]]
@@ -65,9 +67,6 @@ stripping of user activity tracking query parameters are only planned.
 
 # src_elisp{} is rendered literally by GitHub,
 # so elisp: links are used.
-# There are zero width spaces between link brackets
-# and "=" verbatim markers to test whether it may be
-# a workaround against markers rendered inside link description.
 To capture pages using bURL,
 [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html][server]]
 ([[info:emacs#Emacs Server][info "(emacs) Emacs Server"]]),
