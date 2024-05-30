@@ -150,8 +150,6 @@ may be better than =~/.local/bin=.
 
 The result should be like the following:
 
-# The folloing is not supported by GitHub renderer
-#    #+caption: [[file:~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json][=~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json=]]
 [[file:~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json][~/.mozilla/native-messaging-hosts/io.github.maxnikulin.burl.json]]
 #+begin_example
   {
@@ -167,7 +165,6 @@ The result should be like the following:
 
 Omitting error-handling stuff, wrapper looks like
 
-# Unsupported by GitHub: #+caption:
 [[file:~/.local/bin/burl_wrapper][~/.local/bin/burl_wrapper]]
 #+begin_example
   #!/bin/sh -eu
