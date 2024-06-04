@@ -1,9 +1,9 @@
-#+PROPERTY: header-args :eval never :exports code :results silent
 #+title: Go native applications for browser extensions
 # - Disable subscript/superscripts since org-ruby ignores
 #   markers around whole link description.
 # - Enable footnotes
 #+OPTIONS: ^:nil f:t
+#+PROPERTY: header-args :eval never :exports code :results silent
 
 Essentially this is an adapter for the Go [[https://golang.org/pkg/net/rpc/jsonrpc][net/rpc/jsonrpc]] standard package
 that implements communication with browsers through =stdin= and =stdout=

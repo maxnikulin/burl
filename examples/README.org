@@ -1,9 +1,9 @@
-#+PROPERTY: header-args :eval never-export :exports code :results silent
 #+TITLE: Usage examples of Go WebExtensions package
 # - Disable subscript/superscripts since org-ruby ignores
 #   markers around whole link description.
 # - Enable footnotes
 #+OPTIONS: ^:nil f:t
+#+PROPERTY: header-args :eval never-export :exports code :results silent
 
 Go module =github.com/maxnikulin/burl= contains
 =github.com/maxnikulin/burl/pkg/webextensions= package that implements
@@ -44,7 +44,7 @@ It specifies full path to the application and list of extensions
 that can run it. (For Chrome the related field is named
 =allowed_origins= and contains a list of extension keys.)
 
-#+CAPTION: Template for native messaging manifest
+Template for native messaging manifest:
 #+NAME: native_messaging_manifest_template
 #+begin_example
   {
