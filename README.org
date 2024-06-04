@@ -40,7 +40,7 @@ directly, so it is not necessary
 [[https://orgmode.org/worg/org-contrib/org-protocol.html][to setup desktop-wide org-protocol: handler]].
 LinkRemark source code repository has a simple native messaging app,
 [[https://github.com/maxnikulin/linkremark/blob/master/examples/backend-python/lr_emacsclient.py][lr_emacsclient.py Python script]],
-that calls emacsclient for org-protocol: URIs representing captures.
+that calls emacsclient for =org-protocol:= URIs representing captures.
 The advantage of bURL is that
 with a bit more configuration, browser add-on will show
 headings with the same URL as the captured page (a frame on it, or the link)

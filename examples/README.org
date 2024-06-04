@@ -1,10 +1,14 @@
 #+PROPERTY: header-args :eval never-export :exports code :results silent
 #+TITLE: Usage examples of Go WebExtensions package
+# - Disable subscript/superscripts since org-ruby ignores
+#   markers around whole link description.
+# - Enable footnotes
+#+OPTIONS: ^:nil f:t
 
 Go module =github.com/maxnikulin/burl= contains
 =github.com/maxnikulin/burl/pkg/webextensions= package that implements
 native messaging communication protocol for browser extensions.
-See the [[file:../pkg/webextensions][=pkg/webextensions=]] folder for details.
+See the [[file:../pkg/webextensions][pkg/webextensions]] folder for details.
 Out of the box the package works on Linux only.
 
 It is assumed that the reader interested in these examples is familiar
@@ -69,7 +73,7 @@ its extension should be =.json=.
 #+end_src
 
 Now you are ready to load browser extension from the
-[[file:webextensions_addon][=webextensions_addons=]] directory as a temporary add-on:
+[[file:webextensions_addon][webextensions_addons]] directory as a temporary add-on:
 #+begin_src sh
   firefox 'about:debugging#/runtime/this-firefox'
 #+end_src

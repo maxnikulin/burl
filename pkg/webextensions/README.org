@@ -28,7 +28,7 @@ interface. Under the hood it would do something like
   port.postMessage({id, method: "example.Method", params: [arg]});
 #+end_src
 
-Have a look at the [[file:../../examples][=../../examples/]] directory for a complete example
+Have a look at the [[file:../../examples][../../examples/]] directory for a complete example
 of a backend and a Firefox extension.
 
 * Rationale of native messaging application for browser add-ons
@@ -64,7 +64,7 @@ Provided examples usually even do not limit listen addresses
 of a TCP port to the loopback interface.
 As a result backend is exposed to whole local network
 that may be large enough when such server is used in an office.
-Even if 127.0.0.1 of =::1=  optional argument of listen call is not missed,
+Even if =127.0.0.1= or =::1= optional argument of listen call is not missed,
 any application (maybe one belongs to other user) on the local machine
 can connect to the TCP port.
 The opposite side of hassle with configuration of native messaging
