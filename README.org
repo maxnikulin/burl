@@ -69,7 +69,7 @@ as a configuration file, only exact matches of URLs are checked.
 URL normalization e.g. default index page,
 stripping of user activity tracking query parameters are only planned.
 
-* Install
+** Install
 
 # src_elisp{} is rendered literally by GitHub,
 # so elisp: links are used.
@@ -196,12 +196,12 @@ If you have provided list of files, you can try URL lookup
 form the add-on preview & debug info page. The "Mentions" sections
 allows to check any URLs (one per line).
 
-* Tuning of Emacs
+** Tuning of Emacs
   :PROPERTIES:
   :CUSTOM_ID: emacs-tune
   :END:
 
-** Open Org file at particular line
+*** Open Org file at particular line
    :PROPERTIES:
    :CUSTOM_ID: emacs-open-at-line
    :END:
@@ -225,7 +225,7 @@ of code to your Emacs init file
 
 Alternatively use =C-c C-r= that is a binding for =M-x= [[help:org-reveal][org-reveal]].
 
-** Frame (window) for capture or to show existing link
+*** Frame (window) for capture or to show existing link
    :PROPERTIES:
    :CUSTOM_ID: emacs-ensure-frame
    :END:
@@ -250,7 +250,7 @@ I have not figured out how to cook something better from the following
 ingredients: ~server-window~, ~display-buffer-alist~,
 ~frames-on-display-list~, ~default-frame-alist~.
 
-* WebExtensions package for Go
+** WebExtensions package for Go
 
 This project has a simple Go package that provides tools for using
 [[https://pkg.go.dev/net/rpc/jsonrpc][net/rpc/jsonrpc]] (frozen) package from Go standard library through =stdin=
@@ -265,7 +265,7 @@ See [[file:pkg/webextensions][pkg/webextensions]] folder for more detailed descr
 The [[file:examples][examples]] directory contains a small backend and a Firefox
 extension that can call its methods.
 
-* License
+** License
 
 GPL v3
 

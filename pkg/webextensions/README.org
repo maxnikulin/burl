@@ -10,7 +10,7 @@ that implements communication with browsers through =stdin= and =stdout=
 pipes using a kind of streaming JSON protocol with package size
 as a binary header.
 
-* Examples of code
+** Examples of code
 
 If you are eager to see a code example, the following is a snippet
 of native application:
@@ -31,7 +31,7 @@ interface. Under the hood it would do something like
 Have a look at the [[file:../../examples][../../examples/]] directory for a complete example
 of a backend and a Firefox extension.
 
-* Rationale of native messaging application for browser add-ons
+** Rationale of native messaging application for browser add-ons
 
 To allow browser extensions (WebExtensions) access to local files or
 running external applications, it is necessary to install
@@ -71,7 +71,7 @@ The opposite side of hassle with configuration of native messaging
 host is more direct and so private access to local files
 (of course, only if the backend is a trusted application).
 
-* Go package for native messaging hosts in details
+** Go package for native messaging hosts in details
 
 JSON is a natural way to exchange data from browser's JavaScript.
 Additional layer of JSON-RPC protocol allows to reliably
@@ -138,7 +138,7 @@ particular. It can be considered a bit over-engineered but it allows
 to avoid dumb code with hand-written serialization and
 deserialization. I hope it might be still useful to someone.
 
-* Footnotes
+** Footnotes
 # Section name is fixed. Otherwise ox-html creates another "Footnotes:" section.
 # Use localized name without trailing ":".
 # org-ruby export labels as is, so do not use long label names.
