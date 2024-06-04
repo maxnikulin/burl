@@ -1,5 +1,9 @@
 #+PROPERTY: header-args :eval never :exports code :results silent
 #+title: Go native applications for browser extensions
+# - Disable subscript/superscripts since org-ruby ignores
+#   markers around whole link description.
+# - Enable footnotes
+#+OPTIONS: ^:nil f:t
 
 Essentially this is an adapter for the Go [[https://golang.org/pkg/net/rpc/jsonrpc][net/rpc/jsonrpc]] standard package
 that implements communication with browsers through =stdin= and =stdout=
@@ -87,7 +91,7 @@ has some limitations:
 
 - JSON-RPC 1.0 only.
 - Single parameter passed as single element array.
-- No support of contexts[fn:gocontext] that allows to associate some data
+- No support of contexts[fn:1] that allows to associate some data
   with particular request, to impose a timeout, or to cancel
   processing.
 - Structured errors are impossible due to a field of string type in
@@ -96,10 +100,6 @@ has some limitations:
 
 Maybe it is possible to use utilities from this package
 with a third-party Go RPC package following contemporary best practices.
-
-[fn:gocontext] Sameer Ajmani. [[https://blog.golang.org/context][Go Concurrency Patterns: Context]].
-The Go Blog. 29 July 2014.
-
 
 This library provides just a couple of things that allow
 WebExtensions native messaging protocol to fit into the Go RPC
@@ -137,5 +137,13 @@ programming in general and of standard library interfaces in
 particular. It can be considered a bit over-engineered but it allows
 to avoid dumb code with hand-written serialization and
 deserialization. I hope it might be still useful to someone.
+
+* Footnotes
+# Section name is fixed. Otherwise ox-html creates another "Footnotes:" section.
+# Use localized name without trailing ":".
+# org-ruby export labels as is, so do not use long label names.
+
+[fn:1] Sameer Ajmani. [[https://blog.golang.org/context][Go Concurrency Patterns: Context]].
+The Go Blog. 29 July 2014.
 
 # LocalWords: backend JSON RPC
