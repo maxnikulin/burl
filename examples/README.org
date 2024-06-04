@@ -4,7 +4,7 @@
 Go module =github.com/maxnikulin/burl= contains
 =github.com/maxnikulin/burl/pkg/webextensions= package that implements
 native messaging communication protocol for browser extensions.
-See [[file:../pkg/webextensions][=pkg/webextensions=]] folder for details.
+See the [[file:../pkg/webextensions][=pkg/webextensions=]] folder for details.
 Out of the box the package works on Linux only.
 
 It is assumed that the reader interested in these examples is familiar
@@ -90,3 +90,5 @@ argument in =params= field or request ={ params: [ arg ], id, method }=.
 JSON-RPC 2.0 requests should not cause a problem while they follow
 convention for single argument. Do not expect structured errors
 in response however.
+
+# LocalWords: backend JSON RPC

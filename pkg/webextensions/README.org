@@ -24,7 +24,7 @@ interface. Under the hood it would do something like
   port.postMessage({id, method: "example.Method", params: [arg]});
 #+end_src
 
-Have a look at [[file:../../examples][=../../examples/]] directory for a complete example
+Have a look at the [[file:../../examples][=../../examples/]] directory for a complete example
 of a backend and a Firefox extension.
 
 * Rationale of native messaging application for browser add-ons
@@ -45,7 +45,7 @@ Native backend is a way to escape this jail and to allow
 operation with local files. At the same time it is additional risk
 that, having full access to filesystem, a malicious
 add-on might steal sensitive data with help of backend application.
-However installing and configuring of external application in addition
+However installing and configuring an external application in addition
 to a browser extension is an extra step for users that reduces the chance
 that additional privileges are unintentional.
 The expected and unavoidable consequence of such policy is that native
@@ -74,7 +74,7 @@ Additional layer of JSON-RPC protocol allows to reliably
 discriminate regular results, runtime errors handled by application,
 and serious problems lead to crash.
 
-Since packages have identifiers, it is possible to process
+Since packets have identifiers, it is possible to process
 several queries in parallel. However some measures
 to limit concurrent heavy queries may be required
 and they have not been taken yet.
@@ -90,7 +90,7 @@ has some limitations:
 - No support of contexts[fn:gocontext] that allows to associate some data
   with particular request, to impose a timeout, or to cancel
   processing.
-- Structured errors are impossible due to a filed of string type in
+- Structured errors are impossible due to a field of string type in
   the intermediate structure from =net/rpc= package.
 
 
@@ -137,3 +137,5 @@ programming in general and of standard library interfaces in
 particular. It can be considered a bit over-engineered but it allows
 to avoid dumb code with hand-written serialization and
 deserialization. I hope it might be still useful to someone.
+
+# LocalWords: backend JSON RPC
