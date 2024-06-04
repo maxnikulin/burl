@@ -198,12 +198,12 @@ allows to check any URLs (one per line).
 
 ** Tuning of Emacs
   :PROPERTIES:
-  :CUSTOM_ID: emacs-tune
+  :CUSTOM_ID: tuning-of-emacs
   :END:
 
 *** Open Org file at particular line
    :PROPERTIES:
-   :CUSTOM_ID: emacs-open-at-line
+   :CUSTOM_ID: open-org-file-at-particular-line
    :END:
 
 When a file is opened at particular line by clicking on some link
@@ -227,7 +227,7 @@ Alternatively use =C-c C-r= that is a binding for =M-x= [[help:org-reveal][org-r
 
 *** Frame (window) for capture or to show existing link
    :PROPERTIES:
-   :CUSTOM_ID: emacs-ensure-frame
+   :CUSTOM_ID: frame-window-for-capture-or-to-show-existing-link
    :END:
 
 I am unsure what is the best way to create frame (if it does not exist yet)
