@@ -1,6 +1,10 @@
 
 #+TITLE: bURL — Native Messaging Application for LinkRemark and orco
 
+# - Disable subscript/superscripts since org-ruby ignores
+#   markers around whole link description.
+# - Enable footnotes
+#+OPTIONS: ^:nil f:t
 #+PROPERTY: header-args :eval never-export :exports code :results silent
 
 # Warning! Due to GitHub limitations do not use
@@ -25,12 +29,12 @@ in message list which ones are mentioned in your notes.
 Such kind of application is called native messaging host
 (application, backend) for a browser add-on. It serves as a bridge
 that allows to run [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Invoking-emacsclient.html][emacsclient]]
-([[info:emacs#Invoking emacsclient][info "(emacs) Invoking emacsclient"]])
+([[info:emacs#Invoking emacsclient][info \quot(emacs) Invoking emacsclient\quot]])
 and to search URLs in your notes.
 Browser extension can not do it directly due to security reasons.
 In respect to capturing notes, bURL can work with
 [[https://orgmode.org/manual/Protocols.html][org-protocol]]
-([[info:org#Protocols][info "(org) Protocols"]])
+([[info:org#Protocols][info \quot(org) Protocols\quot]])
 using [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Invoking-emacsclient.html][emacsclient]]
 directly, so it is not necessary
 [[https://orgmode.org/worg/org-contrib/org-protocol.html][to setup desktop-wide org-protocol: handler]].
@@ -71,7 +75,7 @@ stripping of user activity tracking query parameters are only planned.
 # so elisp: links are used.
 To capture pages using bURL,
 [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Emacs-Server.html][server]]
-([[info:emacs#Emacs Server][info "(emacs) Emacs Server"]]),
+([[info:emacs#Emacs Server][info \quot(emacs) Emacs Server\quot]]),
 should be running in Emacs: [[elisp:(server-start)][M-x server-start]] to try it,
 ~(server-start)~ in config file, or start Emacs in daemon mode
 (maybe as a user systemd service) as a long term solution.
@@ -79,10 +83,13 @@ Without Emacs server the backend is still able to check
 presence of URLs in configured files, but links to particular lines
 from LinkRemark preview page do not work.
 
+# - org-ruby does not recognize markers at the borders of link description.
+# - It does not allow to disable smart quotes,
+# - There is no entity for apostrophe.
 It is necessary to load [[https://orgmode.org/manual/Protocols.html][org-protocol]]
-([[info:org#Protocols][info "(org) Protocols"]])
+([[info:org#Protocols][info \quot(org) Protocols\quot]])
 e.g. by customizing list of Org packages
-[[elisp:(customize-variable-other-window 'org-modules)][M-: (customize-variable-other-window 'org-modules)]]
+[[elisp:(customize-variable-other-window 'org-modules)][M-: (=customize-variable-other-window 'org-modules=)]]
 unless you are going to insert captured notes using
 [[help:org-paste-subtree][C-c C-x C-y, org-paste-subtree]].
 
